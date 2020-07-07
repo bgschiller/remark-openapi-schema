@@ -1,0 +1,48 @@
+
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: UpdateSandwichMenu
+  x-namespace: DeliCounter
+  license:
+    name: MIT
+
+paths:
+  /:
+    get:
+      responses:
+        '200':
+           description: OK
+
+components:
+  schemas:
+    UpdateSandwichMenu: # AGGREGATE-NAME
+      type: object  # SUPPORTED-OPENAPI-TYPE
+      description: 'Update sandwich menu.' # TEXT
+      x-aggregate-version: v1.0.0  # VERSION-STRING
+      properties:
+        MenuItemsVersion: { type: string, description: 'Menu items version' }
+        MenuItems:
+          type: array
+          items: { $ref: '#/components/schemas/MenuItem' }
+      x-meta-data:
+        versions:
+          v1.0.0: # VERSION-STRING
+            properties:
+              MenuItems:
+                x-version-ref: 'v1.0.0'
+              MenuItemsVersion:
+                x-version-ref: 'v1.0.0'
+    MenuItem:
+      type: object
+      properties:
+        name: { type: string }
+        price: { type: number }
+        id: { type: string }
+        diet:
+          type: integer
+          format: enum-int32
+          x-enumName: MenuItemDietEnum
+          x-enumSuffix: MenuItemDiet
+          x-enumNames: [ Vegan, Vegetarian, Meaty ]
+          enum: [ 0, 1, 2 ]

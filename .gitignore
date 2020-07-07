@@ -6,3 +6,4 @@ node_modules/
 remark-inline-links.js
 remark-inline-links.min.js
 yarn.lock
+scratch.html
