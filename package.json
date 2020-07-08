@@ -1,6 +1,8 @@
 {
   "name": "remark-openapi-schema",
-  "version": "4.0.0",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "description": "remark plugin to transform references and definitions into normal links and images",
   "license": "MIT",
   "keywords": [
@@ -51,15 +53,13 @@
   },
   "scripts": {
     "test": "jest",
-    "test:debug": "node --inspect-brk $(npm bin)/jest --runInBand"
+    "test:debug": "node --inspect-brk $(npm bin)/jest --runInBand",
+    "build": "tsc"
   },
   "prettier": {
     "tabWidth": 2,
     "useTabs": false,
-    "singleQuote": true,
-    "bracketSpacing": false,
-    "semi": false,
-    "trailingComma": "none"
+    "singleQuote": true
   },
   "jest": {
     "transform": {
