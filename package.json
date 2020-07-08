@@ -31,7 +31,7 @@
     "json-schema-ref-parser": "^9.0.1",
     "mdast-util-definitions": "^3.0.1",
     "puppeteer": "^5.0.0",
-    "puppeteer-brillo": "^1.1.0",
+    "puppeteer-brillo": "^1.1.1",
     "unist-util-visit": "^2.0.0"
   },
   "devDependencies": {

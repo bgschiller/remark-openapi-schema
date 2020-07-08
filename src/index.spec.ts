@@ -1,44 +1,46 @@
-'use strict'
+'use strict';
 
-import remark from 'remark'
-import path from 'path'
-import vfile from 'vfile'
-const linkMessageViews = require('./index')
-import emptyPromise from 'empty-promise'
-import * as fs from 'fs-extra'
+import remark from 'remark';
+import path from 'path';
+import vfile from 'vfile';
+const linkMessageViews = require('./index');
+import emptyPromise from 'empty-promise';
+import * as fs from 'fs-extra';
 
 function mkCb<T = any>() {
-  const p = emptyPromise<T>()
+  const p = emptyPromise<T>();
   return {
     p,
     cb: (err: Error | null, value: T) => {
-      if (err) return p.reject(err)
-      return p.resolve(value)
-    }
-  }
+      if (err) return p.reject(err);
+      return p.resolve(value);
+    },
+  };
 }
 
 describe('remark-inline-links', () => {
-  const runtimeDir = path.join(__dirname, 'runtime')
+  const runtimeDir = path.join(__dirname, 'runtime');
+
+  beforeEach(() => fs.emptyDir('src/runtime/images'));
 
   it('picks up new images', async () => {
-    const {p, cb} = mkCb()
+    const { p, cb } = mkCb();
     const input = vfile({
       contents: `
 ![](../fixtures/PrepareSandwich.yaml)
 `,
-      path: path.join(runtimeDir, 'test.md')
-    })
-    remark().use(linkMessageViews).process(input, cb)
-    const file = await p
+      path: path.join(runtimeDir, 'test.md'),
+    });
+    remark().use(linkMessageViews).process(input, cb);
+    const file = await p;
     expect(file.contents).toMatchInlineSnapshot(`
       "[![](images/PrepareSandwich.svg)](../fixtures/PrepareSandwich.yaml)
       "
-    `)
+    `);
     const svg = await fs.readFile(
       path.join(__dirname, 'runtime/images/PrepareSandwich.svg'),
       'utf-8'
-    )
+    );
     expect(svg).toMatchInlineSnapshot(`
       "
       <svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"330.046875\\" height=\\"117.21875\\">
@@ -82,28 +84,28 @@ describe('remark-inline-links', () => {
       <tspan x=\\"16\\" dy=\\"1.2em\\">- SandwichId: string</tspan></text>
       </svg>
       "
-    `)
+    `);
     expect(file.messages[0].message).toBe(
       'new yaml link found: ../fixtures/PrepareSandwich.yaml'
-    )
-  })
+    );
+  });
 
   it('recompiles old images', async () => {
-    const {p, cb} = mkCb()
+    const { p, cb } = mkCb();
     const input = vfile({
       contents: `
 [![](images/UpdateSandwichMenu.svg)](../fixtures/UpdateSandwichMenu.yaml)
 `,
-      path: path.join(runtimeDir, 'test.md')
-    })
+      path: path.join(runtimeDir, 'test.md'),
+    });
 
-    remark().use(linkMessageViews).process(input, cb)
-    const file = await p
-    expect(file.contents).toBe(input.contents)
+    remark().use(linkMessageViews).process(input, cb);
+    const file = await p;
+    expect(file.contents).toBe(input.contents);
     const svg = await fs.readFile(
       path.join(__dirname, 'runtime/images/UpdateSandwichMenu.svg'),
       'utf-8'
-    )
+    );
     expect(svg).toMatchInlineSnapshot(`
       "
       <svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"378.0625\\" height=\\"251.609375\\">
@@ -154,26 +156,26 @@ describe('remark-inline-links', () => {
       <tspan x=\\"40\\" dy=\\"1.2em\\">- Meaty</tspan></text>
       </svg>
       "
-    `)
+    `);
     expect(file.messages[0].message).toBe(
       'recompiling image for ../fixtures/UpdateSandwichMenu.yaml'
-    )
-  })
+    );
+  });
 
   it("warns when yaml files can't be found", async () => {
-    const {p, cb} = mkCb()
+    const { p, cb } = mkCb();
     const input = vfile({
       contents: `
 ![](../fixtures/NonExistent.yaml)
 `,
-      path: path.join(runtimeDir, 'test.md')
-    })
+      path: path.join(runtimeDir, 'test.md'),
+    });
 
-    remark().use(linkMessageViews).process(input, cb)
-    const file = await p
-    expect(file.contents).toBe(input.contents)
+    remark().use(linkMessageViews).process(input, cb);
+    const file = await p;
+    expect(file.contents).toBe(input.contents);
     expect(file.messages[0].message).toMatch(
       'something went wrong compiling ../fixtures/NonExistent.yaml: Error: ENOENT: no such file or directory, open'
-    )
-  })
-})
+    );
+  });
+});

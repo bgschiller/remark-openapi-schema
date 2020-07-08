@@ -36,18 +36,19 @@ function mkCb() {
             if (err)
                 return p.reject(err);
             return p.resolve(value);
-        }
+        },
     };
 }
 describe('remark-inline-links', () => {
     const runtimeDir = path_1.default.join(__dirname, 'runtime');
+    beforeEach(() => fs.emptyDir('src/runtime/images'));
     it('picks up new images', async () => {
         const { p, cb } = mkCb();
         const input = vfile_1.default({
             contents: `
 ![](../fixtures/PrepareSandwich.yaml)
 `,
-            path: path_1.default.join(runtimeDir, 'test.md')
+            path: path_1.default.join(runtimeDir, 'test.md'),
         });
         remark_1.default().use(linkMessageViews).process(input, cb);
         const file = await p;
@@ -108,7 +109,7 @@ describe('remark-inline-links', () => {
             contents: `
 [![](images/UpdateSandwichMenu.svg)](../fixtures/UpdateSandwichMenu.yaml)
 `,
-            path: path_1.default.join(runtimeDir, 'test.md')
+            path: path_1.default.join(runtimeDir, 'test.md'),
         });
         remark_1.default().use(linkMessageViews).process(input, cb);
         const file = await p;
@@ -173,7 +174,7 @@ describe('remark-inline-links', () => {
             contents: `
 ![](../fixtures/NonExistent.yaml)
 `,
-            path: path_1.default.join(runtimeDir, 'test.md')
+            path: path_1.default.join(runtimeDir, 'test.md'),
         });
         remark_1.default().use(linkMessageViews).process(input, cb);
         const file = await p;

@@ -4,6 +4,7 @@ import { VFile } from 'vfile';
 import fs from 'fs-extra';
 import { Node } from 'unist';
 import { Image, Link } from 'mdast';
+import { forceCloseBrowser } from 'puppeteer-brillo';
 import { schemaToSvg } from './message-view';
 
 function isYamlLink(n: Node): n is Link {
@@ -48,7 +49,6 @@ module.exports = function linkMessageViews() {
         proms.push(completion
           .then(() => vfile.info(`recompiling image for ${parent.url}`, node))
           .catch((err) => vfile.message(`something went wrong recompiling ${parent.url}: ${err}`, node)));
-
       } else if (isYamlImage(node)) {
         const { completion, filename } = schemaToSvg(path.join(mdDir, node.url), imageDir);
         proms.push(completion
@@ -59,6 +59,8 @@ module.exports = function linkMessageViews() {
       }
     });
 
-    return Promise.all(proms).then(() => {});
+    return Promise.all(proms)
+      .then(() => {})
+      .finally(forceCloseBrowser);
   }
 }
