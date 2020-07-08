@@ -134,7 +134,10 @@ function _makeAttributes(schema, { indent, name }) {
 exports._makeAttributes = _makeAttributes;
 async function createSvg(message_) {
     const message = await json_schema_ref_parser_1.default.default.dereference(message_);
-    const title = await makeTitleBox({ title: message.info.title, version: message.info.version });
+    const title = await makeTitleBox({
+        title: message.info.title,
+        version: message.components.schemas[message.info.title]['x-aggregate-version'],
+    });
     const attributes = await makeAttributes(message);
     const svgHeight = attributes.height + 80;
     const svgWidth = Math.max(attributes.width, title.width) + 10;

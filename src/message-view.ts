@@ -139,7 +139,10 @@ export function _makeAttributes(schema: any, { indent, name }: { name: string; i
 
 export async function createSvg(message_: any): Promise<string> {
   const message = await RefParser.default.dereference(message_);
-  const title = await makeTitleBox({ title: message.info.title, version: message.info.version });
+  const title = await makeTitleBox({
+    title: message.info.title,
+    version: message.components.schemas[message.info.title]['x-aggregate-version'],
+  });
   const attributes = await makeAttributes(message);
   const svgHeight = attributes.height + 80;
   const svgWidth = Math.max(attributes.width, title.width) + 10;
