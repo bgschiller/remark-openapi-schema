@@ -1,5 +1,5 @@
 {
-  "name": "remark-bct-openapi-schema",
+  "name": "remark-openapi-schema",
   "version": "4.0.0",
   "description": "remark plugin to transform references and definitions into normal links and images",
   "license": "MIT",
@@ -16,8 +16,8 @@
     "link",
     "image"
   ],
-  "repository": "bgschiller/remark-bct-openapi-schema",
-  "bugs": "https://github.com/bgschiller/remark-bct-openapi-schema/issues",
+  "repository": "bgschiller/remark-openapi-schema",
+  "bugs": "https://github.com/bgschiller/remark-openapi-schema/issues",
   "author": "Brian Schiller <bgschiller@gmail.com> (https://brianschiller.com)",
   "contributors": [
     "Brian Schiller <bgschiller@gmail.com> (https://brianschiller.com)"
