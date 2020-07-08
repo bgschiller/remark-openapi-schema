@@ -14,7 +14,11 @@ function isYamlImage(n: Image): boolean {
   return /\.yaml$/.test(n.url);
 }
 
-export function linkMessageViews() {
+// remark seems to only pick up on plugins if they show up
+// as a function when require()'d. This means we can't use
+// an "export default", which would make the result of a
+// require() be { __esModule: true, default: function() {...} }
+module.exports = function linkMessageViews() {
   return transformer;
 
   async function transformer(tree: Node, vfile: VFile): Promise<void> {

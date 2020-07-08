@@ -160,9 +160,3 @@ function schemaToSvg(messageFile, destination) {
     return { filename: svgFilename, completion };
 }
 exports.schemaToSvg = schemaToSvg;
-// (async function() {
-//   const contents = await fs.readFile(path.join(__dirname, 'fixtures', 'UpdateSandwichMenu.yaml'), 'utf-8');
-//   const message = yaml.safeLoad(contents);
-//   const svg = await createSvg(message);
-//   await fs.writeFile(path.join(__dirname, '..', 'output.html'), svg, 'utf-8');
-// })();

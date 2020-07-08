@@ -25,7 +25,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const remark_1 = __importDefault(require("remark"));
 const path_1 = __importDefault(require("path"));
 const vfile_1 = __importDefault(require("vfile"));
-const index_1 = require("./index");
+const linkMessageViews = require('./index');
 const empty_promise_1 = __importDefault(require("empty-promise"));
 const fs = __importStar(require("fs-extra"));
 function mkCb() {
@@ -49,7 +49,7 @@ describe('remark-inline-links', () => {
 `,
             path: path_1.default.join(runtimeDir, 'test.md')
         });
-        remark_1.default().use(index_1.linkMessageViews).process(input, cb);
+        remark_1.default().use(linkMessageViews).process(input, cb);
         const file = await p;
         expect(file.contents).toMatchInlineSnapshot(`
       "[![](images/PrepareSandwich.svg)](../fixtures/PrepareSandwich.yaml)
@@ -110,7 +110,7 @@ describe('remark-inline-links', () => {
 `,
             path: path_1.default.join(runtimeDir, 'test.md')
         });
-        remark_1.default().use(index_1.linkMessageViews).process(input, cb);
+        remark_1.default().use(linkMessageViews).process(input, cb);
         const file = await p;
         expect(file.contents).toBe(input.contents);
         const svg = await fs.readFile(path_1.default.join(__dirname, 'runtime/images/UpdateSandwichMenu.svg'), 'utf-8');
@@ -175,7 +175,7 @@ describe('remark-inline-links', () => {
 `,
             path: path_1.default.join(runtimeDir, 'test.md')
         });
-        remark_1.default().use(index_1.linkMessageViews).process(input, cb);
+        remark_1.default().use(linkMessageViews).process(input, cb);
         const file = await p;
         expect(file.contents).toBe(input.contents);
         expect(file.messages[0].message).toMatch('something went wrong compiling ../fixtures/NonExistent.yaml: Error: ENOENT: no such file or directory, open');

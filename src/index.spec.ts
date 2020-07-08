@@ -3,7 +3,7 @@
 import remark from 'remark'
 import path from 'path'
 import vfile from 'vfile'
-import {linkMessageViews} from './index'
+const linkMessageViews = require('./index')
 import emptyPromise from 'empty-promise'
 import * as fs from 'fs-extra'
 

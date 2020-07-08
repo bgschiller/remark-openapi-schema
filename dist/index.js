@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.linkMessageViews = void 0;
 const unist_util_visit_1 = __importDefault(require("unist-util-visit"));
 const path_1 = __importDefault(require("path"));
 const fs_extra_1 = __importDefault(require("fs-extra"));
@@ -14,7 +13,11 @@ function isYamlLink(n) {
 function isYamlImage(n) {
     return /\.yaml$/.test(n.url);
 }
-function linkMessageViews() {
+// remark seems to only pick up on plugins if they show up
+// as a function when require()'d. This means we can't use
+// an "export default", which would make the result of a
+// require() be { __esModule: true, default: function() {...} }
+module.exports = function linkMessageViews() {
     return transformer;
     async function transformer(tree, vfile) {
         const mdDir = vfile.data.destinationDir || vfile.dirname;
@@ -50,5 +53,4 @@ function linkMessageViews() {
         });
         return Promise.all(proms).then(() => { });
     }
-}
-exports.linkMessageViews = linkMessageViews;
+};
