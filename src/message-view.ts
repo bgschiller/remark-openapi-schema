@@ -84,7 +84,7 @@ async function makeAttributes(message: any): Promise<AttributesNode> {
   const schemas = message.components.schemas;
   const attrs = _makeAttributes(schemas[title], { name: title, indent: 0 })
     .slice(1) // strip off first object's name
-    .map(([indent, contents], ix) => `<tspan x="${indent * 12 + 4}" dy="${ix === 0 ? '.6' : '1.2'}em">&mdash; ${contents}</tspan>`)
+    .map(([indent, contents], ix) => `<tspan x="${indent * 12 + 4}" dy="${ix === 0 ? '.6' : '1.2'}em">- ${contents}</tspan>`)
     .join('\n');
   const text = `<text class="attributes" y="60">${attrs}</text>`;
   const size = await sizeInBrowser(text);
@@ -144,7 +144,7 @@ export async function createSvg(message_: any): Promise<string> {
   const svgHeight = attributes.height + 80;
   const svgWidth = Math.max(attributes.width, title.width) + 10;
   return `
-<svg width="${svgWidth}" height="${svgHeight}">
+<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">
   <style>
     ${makeStyles({ messageNameWidth: title.width, svgHeight, svgWidth })}
   </style>

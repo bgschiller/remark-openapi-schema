@@ -41,14 +41,14 @@ describe('remark-inline-links', () => {
     )
     expect(svg).toMatchInlineSnapshot(`
       "
-      <svg width=\\"331.046875\\" height=\\"117.21875\\">
+      <svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"330.046875\\" height=\\"117.21875\\">
         <style>
           .border {
         stroke-width:2;
         stroke: rgb(0,0,0);
         fill:white;
         height: 113.21875px;
-        width: 327.046875px;
+        width: 326.046875px;
       }
       .message-name-background {
         stroke-width:1;
@@ -78,8 +78,8 @@ describe('remark-inline-links', () => {
         PrepareSandwich
         <tspan class=\\"version\\">1.0.0</tspan>
         </text>
-        <text class=\\"attributes\\" y=\\"60\\"><tspan x=\\"16\\" dy=\\".6em\\">&mdash; SandwichMenuVersion: string</tspan>
-      <tspan x=\\"16\\" dy=\\"1.2em\\">&mdash; SandwichId: string</tspan></text>
+        <text class=\\"attributes\\" y=\\"60\\"><tspan x=\\"16\\" dy=\\".6em\\">- SandwichMenuVersion: string</tspan>
+      <tspan x=\\"16\\" dy=\\"1.2em\\">- SandwichId: string</tspan></text>
       </svg>
       "
     `)
@@ -106,14 +106,14 @@ describe('remark-inline-links', () => {
     )
     expect(svg).toMatchInlineSnapshot(`
       "
-      <svg width=\\"379.0625\\" height=\\"251.609375\\">
+      <svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"378.0625\\" height=\\"251.609375\\">
         <style>
           .border {
         stroke-width:2;
         stroke: rgb(0,0,0);
         fill:white;
         height: 247.609375px;
-        width: 375.0625px;
+        width: 374.0625px;
       }
       .message-name-background {
         stroke-width:1;
@@ -143,15 +143,15 @@ describe('remark-inline-links', () => {
         UpdateSandwichMenu
         <tspan class=\\"version\\">1.0.0</tspan>
         </text>
-        <text class=\\"attributes\\" y=\\"60\\"><tspan x=\\"16\\" dy=\\".6em\\">&mdash; MenuItemsVersion: string</tspan>
-      <tspan x=\\"16\\" dy=\\"1.2em\\">&mdash; MenuItems: array of objects with</tspan>
-      <tspan x=\\"28\\" dy=\\"1.2em\\">&mdash; name: string</tspan>
-      <tspan x=\\"28\\" dy=\\"1.2em\\">&mdash; price: number</tspan>
-      <tspan x=\\"28\\" dy=\\"1.2em\\">&mdash; id: string</tspan>
-      <tspan x=\\"28\\" dy=\\"1.2em\\">&mdash; diet: enum of</tspan>
-      <tspan x=\\"40\\" dy=\\"1.2em\\">&mdash; Vegan</tspan>
-      <tspan x=\\"40\\" dy=\\"1.2em\\">&mdash; Vegetarian</tspan>
-      <tspan x=\\"40\\" dy=\\"1.2em\\">&mdash; Meaty</tspan></text>
+        <text class=\\"attributes\\" y=\\"60\\"><tspan x=\\"16\\" dy=\\".6em\\">- MenuItemsVersion: string</tspan>
+      <tspan x=\\"16\\" dy=\\"1.2em\\">- MenuItems: array of objects with</tspan>
+      <tspan x=\\"28\\" dy=\\"1.2em\\">- name: string</tspan>
+      <tspan x=\\"28\\" dy=\\"1.2em\\">- price: number</tspan>
+      <tspan x=\\"28\\" dy=\\"1.2em\\">- id: string</tspan>
+      <tspan x=\\"28\\" dy=\\"1.2em\\">- diet: enum of</tspan>
+      <tspan x=\\"40\\" dy=\\"1.2em\\">- Vegan</tspan>
+      <tspan x=\\"40\\" dy=\\"1.2em\\">- Vegetarian</tspan>
+      <tspan x=\\"40\\" dy=\\"1.2em\\">- Meaty</tspan></text>
       </svg>
       "
     `)
