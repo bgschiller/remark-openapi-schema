@@ -2,7 +2,7 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: PrepareSandwhich
+  title: PrepareSandwich
   x-namespace: DeliCounter
   license:
     name: MIT
@@ -17,7 +17,7 @@ paths:
 
 components:
   schemas:
-    PrepareSandwhich: # AGGREGATE-NAME
+    PrepareSandwich: # AGGREGATE-NAME
       type: object  # SUPPORTED-OPENAPI-TYPE
       description: 'counter is instructed to begin preparing sandwich' # TEXT
       x-aggregate-version: v1.0.0  # VERSION-STRING

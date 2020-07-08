@@ -1,50 +1,60 @@
-'use strict'
-
 import visit from 'unist-util-visit';
-import getDefinitions, { Options } from 'mdast-util-definitions';
+import path from 'path';
+import { VFile } from 'vfile';
+import fs from 'fs-extra';
 import { Node } from 'unist';
-import { Parent, Definition, Image, Link, ImageReference, LinkReference } from 'mdast';
+import { Image, Link } from 'mdast';
+import { schemaToSvg } from './message-view';
 
+function isYamlLink(n: Node): n is Link {
+  return n.type === 'link' && /\.yaml$/.test((n as Link).url);
+}
 
-export function inlineLinks(options: Options) {
-  return transformer
+function isYamlImage(n: Image): boolean {
+  return /\.yaml$/.test(n.url);
+}
 
-  function transformer(tree: Node) {
-    const definitions = getDefinitions(tree, options)
+export function linkMessageViews() {
+  return transformer;
 
-    visit(tree, (node, index, parent) => {
-      let definition: Definition | null = null;;
-      let replacement: Image | Link;
-      let image: boolean = false;
+  async function transformer(tree: Node, vfile: VFile): Promise<void> {
+    const mdDir = (vfile.data as any).destinationDir || vfile.dirname;
+    const imageDir = path.join(mdDir, 'images');
+    await fs.mkdirp(imageDir);
 
-      if (node.type === 'definition') {
-        (parent as Parent).children.splice(index, 1)
-        return [visit.SKIP, index]
-      }
+    function mkReplacement({ yaml, svg }: { yaml: string; svg: string }): Link {
+      const embeddedImg: Image = {
+        type: 'image',
+        url: path.relative(mdDir, svg),
+      };
+      const replacement: Link = {
+        type: 'link',
+        url: yaml,
+        children: [embeddedImg],
+      };
+      return replacement;
 
-      if (node.type === 'imageReference' || node.type === 'linkReference') {
-        definition = definitions((node as  ImageReference | LinkReference).identifier)
+    }
 
-        if (definition) {
-          image = node.type === 'imageReference'
+    const proms: Promise<any>[] = [];
 
-          replacement = {
-            type: image ? 'image' : 'link',
-            url: definition.url,
-            title: definition.title,
-            children: [],
-          }
+    visit<Image>(tree, 'image', (node, index, parent) => {
+      if (isYamlLink(parent)) {
+        const { completion } = schemaToSvg(path.join(mdDir, (parent as Link).url), imageDir);
+        proms.push(completion
+          .then(() => vfile.info(`recompiling image for ${parent.url}`, node))
+          .catch((err) => vfile.message(`something went wrong recompiling ${parent.url}: ${err}`, node)));
 
-          if (image) {
-            replacement.alt = node.alt
-          } else {
-            replacement.children = node.children
-          }
+      } else if (isYamlImage(node)) {
+        const { completion, filename } = schemaToSvg(path.join(mdDir, node.url), imageDir);
+        proms.push(completion
+          .then(() => vfile.info(`new yaml link found: ${node.url}`, node))
+          .catch((err) => vfile.message(`something went wrong compiling ${node.url}: ${err}`)));
 
-          (parent as Parent).children[index] = replacement
-          return [visit.SKIP, index]
-        }
+        (parent.children as Node[]).splice(index, 1, mkReplacement({ yaml: node.url, svg: filename }));
       }
     });
+
+    return Promise.all(proms).then(() => {});
   }
 }

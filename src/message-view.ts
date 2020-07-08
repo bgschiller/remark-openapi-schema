@@ -2,76 +2,96 @@ import { Page } from 'puppeteer';
 import { withPage } from 'puppeteer-brillo';
 import RefParser from 'json-schema-ref-parser';
 import chalk from 'chalk';
+import yaml from 'js-yaml';
+import { promises as fs } from 'fs';
+import path from 'path';
 
-function makeStyles({ messageNameWidth }: { messageNameWidth: number }): string {
-  return `
-  .border {
-    stroke-width:2;
-    stroke: rgb(0,0,0);
-    fill:white;
-  }
-  .message-name-background {
-    stroke-width:1;
-    stroke:rgb(0,0,0);
-    fill:aqua;
-    width: ${messageNameWidth}px;
-    height: 40px;
-  }
-  .message-name {
-    font-family: "Lucida Console", Monaco, monospace;
-    font-weight: bold;
-    font-size: 20;
+interface MakeStylesParams {
+  messageNameWidth: number;
+  svgHeight: number;
+  svgWidth: number;
+}
+function makeStyles({ messageNameWidth, svgHeight, svgWidth}: MakeStylesParams): string {
+  return `.border {
+  stroke-width:2;
+  stroke: rgb(0,0,0);
+  fill:white;
+  height: ${svgHeight - 4}px;
+  width: ${svgWidth - 4}px;
+}
+.message-name-background {
+  stroke-width:1;
+  stroke:rgb(0,0,0);
+  fill:rgb(3,166,120);
+  width: ${messageNameWidth}px;
+  height: 40px;
+}
+.message-name {
+  fill: rgb(255,255,255);
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: bold;
+  font-size: 20;
+}
+.version {
+  font-weight: normal;
+  font-size: 12;
+}
+.attributes {
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 16;
+}`;
+}
+const BASE_STYLES = makeStyles({ messageNameWidth: 0, svgHeight: 1000, svgWidth: 1000 });
 
-  }
-  .version {
-    font-weight: normal;
-    font-size: 12;
-  }
-  .attributes {
-    font-family: "Lucida Console", Monaco, monospace;
-    font-size: 16;
-  }`;
+function sizeInBrowser(t: string): Promise<{height: number; width: number}> {
+  return withPage(async (page) => {
+    await page.setContent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000">
+        <style>
+          ${BASE_STYLES}
+        </style>
+        <g>${t}</g>
+      </svg>
+    `);
+    const size = await page.evaluate(() => {
+        const el = document.querySelector<SVGTextElement>(`g > *`);
+        const box = el!.getBBox();
+        return {
+          height: box.height,
+          width: box.width,
+        };
+    });
+    return size;
+  });
 }
 
-function sizeInBrowser(t: string, styles: string): DOMRect {
-  const svg = document.createElement('svg');
-  const style = document.createElement('style');
-  style.innerHTML = styles;
-  svg.appendChild(style);
-  const g = document.createElement('g');
-  g.innerHTML = t;
-  const id = `${Math.round(Math.random() * 10000)}`;
-  g.setAttribute('data-id', id);
-  svg.appendChild(g);
-  document.body.appendChild(svg);
-  const el = document.querySelector<SVGTextElement>(`[data-id="${id}"] > *`);
-  return el!.getBBox();
-}
-
-async function makeTitleBox(page: Page, { title, version }: { title: string; version: string }): Promise<{ messageName: string; width: number }> {
+async function makeTitleBox({ title, version }: { title: string; version: string }): Promise<{ messageName: string; width: number }> {
   const text = `<text x="2" y="28" dx="4" class="message-name">
   ${title}
   <tspan class="version">${version}</tspan>
   </text>`;
-  const size = await page.evaluate(sizeInBrowser, text, makeStyles({ messageNameWidth: 42 }));
-  return { messageName: text, width: size.width };
+  const size = await sizeInBrowser(text);
+  return { messageName: text, width: size.width + 10 };
 }
 
 interface AttributesNode {
-  attributes: string;
+  text: string;
   width: number;
+  height: number;
 }
-async function makeAttributes(page: Page, message: any): Promise<AttributesNode> {
+async function makeAttributes(message: any): Promise<AttributesNode> {
   const title = message.info.title;
   const schemas = message.components.schemas;
   const attrs = _makeAttributes(schemas[title], { name: title, indent: 0 })
-    .map(([indent, contents], ix) => `<tspan x="${indent * 12 + 16}" dy="${ix === 0 ? '.6' : '1.2'}em">${contents}</tspan>`)
+    .slice(1) // strip off first object's name
+    .map(([indent, contents], ix) => `<tspan x="${indent * 12 + 4}" dy="${ix === 0 ? '.6' : '1.2'}em">&mdash; ${contents}</tspan>`)
     .join('\n');
   const text = `<text class="attributes" y="60">${attrs}</text>`;
-  const size = await page.evaluate(sizeInBrowser, text);
+  const size = await sizeInBrowser(text);
   return {
-    attributes: text,
-    width: size.width,
+    text,
+    width: size.width + 32,
+    height: size.height,
   };
 }
 
@@ -117,41 +137,37 @@ export function _makeAttributes(schema: any, { indent, name }: { name: string; i
   return [];
 }
 
-export async function createSvg(message: any): Promise<string> {
-  const svgHeight = 300, svgWidth = 400;
-  return withPage(async (page) => {
-    const title = await makeTitleBox(page, { title: message.info.title, version: message.info.version });
-    return `
-    <svg width="${svgWidth}" height="${svgHeight}">
-    <style>
-    ${makeStyles({ messageNameWidth: title.width })}
-    </style>
-    <rect
-    x="2" y="2" width="${svgWidth - 4}" height="${svgHeight - 4}"
-    class="border"
-    ></rect>
-    <rect
-    class="message-name-background"
-    x="2" y="2"
-    ></rect>
-
-    <text class="attributes" y="60">
-    <tspan x="16" dy=".6em" >&mdash; MenuItemsVersion: string</tspan>
-    <tspan x="16" dy="1.2em">&mdash; MenuItems: array of</tspan>
-    <tspan x="16" dy="1.2em">
-    <tspan x="28" dy="1.2em">&mdash; name: string</tspan>
-    <tspan x="28" dy="1.2em">&mdash; id: string</tspan>
-    <tspan x="28" dy="1.2em">&mdash; price: number</tspan>
-    <tspan x="28" dy="1.2em">&mdash; diet: enum of</tspan>
-    <tspan x="28" dy="1.2em">
-    <tspan x="40" dy="1.2em">&mdash; Vegan</tspan>
-    <tspan x="40" dy="1.2em">&mdash; Vegetarian</tspan>
-    <tspan x="40" dy="1.2em">&mdash; Meaty</tspan>
-    </tspan>
-    </tspan>
-    </text>
-    </svg>
-
-    `;
-  });
+export async function createSvg(message_: any): Promise<string> {
+  const message = await RefParser.default.dereference(message_);
+  const title = await makeTitleBox({ title: message.info.title, version: message.info.version });
+  const attributes = await makeAttributes(message);
+  const svgHeight = attributes.height + 80;
+  const svgWidth = Math.max(attributes.width, title.width) + 10;
+  return `
+<svg width="${svgWidth}" height="${svgHeight}">
+  <style>
+    ${makeStyles({ messageNameWidth: title.width, svgHeight, svgWidth })}
+  </style>
+  <rect x="2" y="2" class="border"></rect>
+  <rect class="message-name-background" x="2" y="2"></rect>
+  ${title.messageName}
+  ${attributes.text}
+</svg>
+`;
 }
+
+export function schemaToSvg(messageFile: string, destination: string): { filename: string, completion: Promise<void>} {
+  const svgFilename = path.join(destination, path.basename(messageFile, 'yaml') + 'svg');
+  const completion = fs.readFile(messageFile, 'utf-8')
+    .then(yaml.safeLoad)
+    .then(createSvg)
+    .then((svg) => fs.writeFile(svgFilename, svg, 'utf-8'));
+  return { filename: svgFilename, completion };
+}
+
+// (async function() {
+//   const contents = await fs.readFile(path.join(__dirname, 'fixtures', 'UpdateSandwichMenu.yaml'), 'utf-8');
+//   const message = yaml.safeLoad(contents);
+//   const svg = await createSvg(message);
+//   await fs.writeFile(path.join(__dirname, '..', 'output.html'), svg, 'utf-8');
+// })();
