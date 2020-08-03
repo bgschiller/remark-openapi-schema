@@ -60,7 +60,6 @@ module.exports = function linkMessageViews() {
     });
 
     return Promise.all(proms)
-      .then(() => {})
-      .finally(forceCloseBrowser);
+      .then(() => {});
   }
 }
