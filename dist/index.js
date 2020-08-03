@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const unist_util_visit_1 = __importDefault(require("unist-util-visit"));
 const path_1 = __importDefault(require("path"));
 const fs_extra_1 = __importDefault(require("fs-extra"));
-const puppeteer_brillo_1 = require("puppeteer-brillo");
 const message_view_1 = require("./message-view");
 function isYamlLink(n) {
     return n.type === 'link' && /\.yaml$/.test(n.url);
@@ -53,7 +52,6 @@ module.exports = function linkMessageViews() {
             }
         });
         return Promise.all(proms)
-            .then(() => { })
-            .finally(puppeteer_brillo_1.forceCloseBrowser);
+            .then(() => { });
     }
 };

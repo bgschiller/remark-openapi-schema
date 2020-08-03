@@ -72,7 +72,7 @@ describe('remark-inline-links', () => {
         stroke-width:1;
         stroke:rgb(0,0,0);
         fill:rgb(3,166,120);
-        width: 238.046875px;
+        width: 245.25px;
         height: 40px;
       }
       .message-name {
@@ -94,7 +94,7 @@ describe('remark-inline-links', () => {
         <rect class=\\"message-name-background\\" x=\\"2\\" y=\\"2\\"></rect>
         <text x=\\"2\\" y=\\"28\\" dx=\\"4\\" class=\\"message-name\\">
         PrepareSandwich
-        <tspan class=\\"version\\">1.0.0</tspan>
+        <tspan class=\\"version\\">v1.0.0</tspan>
         </text>
         <text class=\\"attributes\\" y=\\"60\\"><tspan x=\\"16\\" dy=\\".6em\\">- SandwichMenuVersion: string</tspan>
       <tspan x=\\"16\\" dy=\\"1.2em\\">- SandwichId: string</tspan></text>
@@ -130,7 +130,7 @@ describe('remark-inline-links', () => {
         stroke-width:1;
         stroke:rgb(0,0,0);
         fill:rgb(3,166,120);
-        width: 274.046875px;
+        width: 281.25px;
         height: 40px;
       }
       .message-name {
@@ -152,7 +152,7 @@ describe('remark-inline-links', () => {
         <rect class=\\"message-name-background\\" x=\\"2\\" y=\\"2\\"></rect>
         <text x=\\"2\\" y=\\"28\\" dx=\\"4\\" class=\\"message-name\\">
         UpdateSandwichMenu
-        <tspan class=\\"version\\">1.0.0</tspan>
+        <tspan class=\\"version\\">v1.0.0</tspan>
         </text>
         <text class=\\"attributes\\" y=\\"60\\"><tspan x=\\"16\\" dy=\\".6em\\">- MenuItemsVersion: string</tspan>
       <tspan x=\\"16\\" dy=\\"1.2em\\">- MenuItems: array of objects with</tspan>
