@@ -24,6 +24,7 @@ components:
       properties:
         SandwichMenuVersion: { type: string, description: 'Sandwich menu version' }
         SandwichId: { type: string, description: 'Sandwich id' }
+        Delicious: { type: boolean, description: 'should it be good?' }
       x-meta-data:
         versions:
           v1.0.0: # VERSION-STRING

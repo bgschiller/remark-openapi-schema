@@ -99,7 +99,7 @@ function warn(msg: string) {
   console.log(chalk.yellow(msg));
 }
 
-const PRIMITIVE_TYPES = ['string', 'integer', 'number'];
+const PRIMITIVE_TYPES = ['string', 'integer', 'number', 'boolean'];
 export function _makeAttributes(schema: any, { indent, name }: { name: string; indent: number; }): [number, string][] {
   if (schema.type === 'object') {
     return [

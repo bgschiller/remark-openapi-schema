@@ -88,7 +88,7 @@ async function makeAttributes(message) {
 function warn(msg) {
     console.log(chalk_1.default.yellow(msg));
 }
-const PRIMITIVE_TYPES = ['string', 'integer', 'number'];
+const PRIMITIVE_TYPES = ['string', 'integer', 'number', 'boolean'];
 function _makeAttributes(schema, { indent, name }) {
     if (schema.type === 'object') {
         return [

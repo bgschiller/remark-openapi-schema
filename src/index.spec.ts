@@ -43,13 +43,13 @@ describe('remark-inline-links', () => {
     );
     expect(svg).toMatchInlineSnapshot(`
       "
-      <svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"330.046875\\" height=\\"117.21875\\">
+      <svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"330.046875\\" height=\\"136.40625\\">
         <style>
           .border {
         stroke-width:2;
         stroke: rgb(0,0,0);
         fill:white;
-        height: 113.21875px;
+        height: 132.40625px;
         width: 326.046875px;
       }
       .message-name-background {
@@ -81,7 +81,8 @@ describe('remark-inline-links', () => {
         <tspan class=\\"version\\">v1.0.0</tspan>
         </text>
         <text class=\\"attributes\\" y=\\"60\\"><tspan x=\\"16\\" dy=\\".6em\\">- SandwichMenuVersion: string</tspan>
-      <tspan x=\\"16\\" dy=\\"1.2em\\">- SandwichId: string</tspan></text>
+      <tspan x=\\"16\\" dy=\\"1.2em\\">- SandwichId: string</tspan>
+      <tspan x=\\"16\\" dy=\\"1.2em\\">- Delicious: boolean</tspan></text>
       </svg>
       "
     `);

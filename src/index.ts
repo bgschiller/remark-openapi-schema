@@ -44,6 +44,7 @@ module.exports = function linkMessageViews() {
     const proms: Promise<any>[] = [];
 
     visit<Image>(tree, 'image', (node, index, parent) => {
+      if (!parent) return;
       if (isYamlLink(parent)) {
         const { completion } = schemaToSvg(path.join(mdDir, (parent as Link).url), imageDir);
         proms.push(completion

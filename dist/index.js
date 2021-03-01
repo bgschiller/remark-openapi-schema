@@ -37,6 +37,8 @@ module.exports = function linkMessageViews() {
         }
         const proms = [];
         unist_util_visit_1.default(tree, 'image', (node, index, parent) => {
+            if (!parent)
+                return;
             if (isYamlLink(parent)) {
                 const { completion } = message_view_1.schemaToSvg(path_1.default.join(mdDir, parent.url), imageDir);
                 proms.push(completion
