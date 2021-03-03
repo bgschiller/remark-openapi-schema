@@ -1,0 +1,55 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: RegisterMessageCapabilitiesResponse
+  x-namespace: Standard
+  license:
+    name: MIT
+
+paths:
+  /:
+    get:
+      responses:
+        '200':
+           description: OK
+
+
+components:
+  schemas:
+    ProjectEnumerations:
+      type: object
+      description: 'ProjectEnumerations'
+      x-aggregate-version: v1
+      properties:
+        RegistrationStatus:  # AGGREGATE-NAME  ENUM-FIELD-SCHEMA ...
+          type: integer
+          format: enum-int32  # ENUM-TYPE
+          x-enumName: RegistrationStatusEnum   # ENUM-NAME
+          x-enumSuffix: RegistrationStatus  # ENUM-SUFFIX
+          x-enumNames: [ Ok, Failed ]  # ENUM-VALUE-NAME, ...
+          x-generateEnumDescriptions: [ 'Ok', 'Failed']
+                                        # ENUM-VALUE-DESCRIPTION, ...
+          enum: [ 0, 1 ]   # ENUM-VALUE, ENUM-VALUE, ...
+      x-meta-data:
+        versions:
+          v1:   # VERSION-STRING
+            properties:
+              RegistrationStatus:
+                x-version-ref: 'v1'  # VERSION-STRING
+    RegisterMessageCapabilitiesResponse: # AGGREGATE-NAME
+      type: object  # SUPPORTED-OPENAPI-TYPE
+      description: 'Register Message Capabilities Response.' # TEXT
+      x-aggregate-version: v1  # VERSION-STRING
+      properties:
+        Status:  # ENUM-FIELD-SCHEMA...
+          type: integer
+          format: enum-int32  # ENUM-TYPE
+          x-enumName: RegistrationStatusEnum   # ENUM-NAME
+          x-enumSuffix: RegistrationStatus  # ENUM-SUFFIX
+      required: [ Status ]
+      x-meta-data:
+        versions:
+          v1: # VERSION-STRING
+            properties:
+              Status:
+                x-version-ref: 'v1'

@@ -16,6 +16,16 @@ paths:
 
 components:
   schemas:
+    ProjectEnumerations:
+      type: object
+      properties:
+        MenuItemDiet:
+          type: integer
+          format: enum-int32
+          x-enumName: MenuItemDietEnum
+          x-enumSuffix: MenuItemDiet
+          x-enumNames: [ Vegan, Vegetarian, Meaty ]
+          enum: [ 0, 1, 2 ]
     UpdateSandwichMenu: # AGGREGATE-NAME
       type: object  # SUPPORTED-OPENAPI-TYPE
       description: 'Update sandwich menu.' # TEXT
@@ -44,5 +54,3 @@ components:
           format: enum-int32
           x-enumName: MenuItemDietEnum
           x-enumSuffix: MenuItemDiet
-          x-enumNames: [ Vegan, Vegetarian, Meaty ]
-          enum: [ 0, 1, 2 ]

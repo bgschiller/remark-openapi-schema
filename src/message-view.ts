@@ -79,10 +79,10 @@ interface AttributesNode {
   width: number;
   height: number;
 }
-async function makeAttributes(message: any): Promise<AttributesNode> {
+async function makeAttributes(message: any, { enumNameToOptions }: { enumNameToOptions: { [k: string]: string[] } }): Promise<AttributesNode> {
   const title = message.info.title;
   const schemas = message.components.schemas;
-  const attrs = _makeAttributes(schemas[title], { name: title, indent: 0 })
+  const attrs = _makeAttributes(schemas[title], { name: title, indent: 0, enumNameToOptions })
     .slice(1) // strip off first object's name
     .map(([indent, contents], ix) => `<tspan x="${indent * 12 + 4}" dy="${ix === 0 ? '.6' : '1.2'}em">- ${contents}</tspan>`)
     .join('\n');
@@ -100,16 +100,16 @@ function warn(msg: string) {
 }
 
 const PRIMITIVE_TYPES = ['string', 'integer', 'number', 'boolean'];
-export function _makeAttributes(schema: any, { indent, name }: { name: string; indent: number; }): [number, string][] {
+export function _makeAttributes(schema: any, { indent, name, enumNameToOptions }: { name: string; indent: number; enumNameToOptions: { [k: string]: string[] } }): [number, string][] {
   if (schema.type === 'object') {
     return [
       [indent, `${name}: object of`],
-      ...Object.keys(schema.properties).flatMap(k => _makeAttributes(schema.properties[k], { name: k, indent: indent + 1 }))
+      ...Object.keys(schema.properties).flatMap(k => _makeAttributes(schema.properties[k], { name: k, indent: indent + 1, enumNameToOptions }))
     ];
-  } else if (schema['x-enumNames']) {
+  } else if (schema['x-enumName']) {
     return [
       [indent, `${name}: enum of`],
-      ...schema['x-enumNames'].map((n: string) => ([indent + 1, n])),
+      ...(schema['x-enumNames'] || enumNameToOptions[schema['x-enumName']]).map((n: string) => ([indent + 1, n])),
     ];
   } else if (PRIMITIVE_TYPES.includes(schema.type)) {
     return [[indent, `${name}: ${schema.type}`]];
@@ -119,31 +119,49 @@ export function _makeAttributes(schema: any, { indent, name }: { name: string; i
   } else if (schema.type === 'array' && schema.items && schema.items.type === 'object') {
     return [
       [indent, `${name}: array of objects with`],
-      ...Object.keys(schema.items.properties).flatMap(k => _makeAttributes(schema.items.properties[k], { name: k, indent: indent + 1 }))
+      ...Object.keys(schema.items.properties).flatMap(k => _makeAttributes(schema.items.properties[k], { name: k, indent: indent + 1, enumNameToOptions }))
     ];
   } else if (schema.type === 'array' && Array.isArray(schema.items)) {
     // specialization for tuple
     return [
       [indent, `${name}: tuple of`],
-      ...schema.items.flatMap((i: any, ix: number) => _makeAttributes(i, { indent: indent + 1, name: `${ix}` })),
+      ...schema.items.flatMap((i: any, ix: number) => _makeAttributes(i, { indent: indent + 1, name: `${ix}`, enumNameToOptions })),
     ];
   } else if (schema.type === 'array') {
     return [
       [indent, `${name}: array of`],
-      ..._makeAttributes(schema.items, { indent: indent + 1, name: name + '.[]' })
+      ..._makeAttributes(schema.items, { indent: indent + 1, name: name + '.[]', enumNameToOptions })
     ];
   }
   warn(`schema ${name} did not match a rule, so nothing was output`);
   return [];
 }
 
+export function enumNames(message: any): any {
+  // the code generator apparently does things in a bass-ackwards way:
+  // https://github.com/TBCTSystems/bct-common-device-standard-messages/commit/c0dd075d9c1e8ffe5acbaf103fc7ccabbe358b6e#diff-89cbd1b59e63e5442fac6337fd997ae97602ee3dce4e192e600ef97d372f4f5e
+  // and avoids using x-enumNames in a sane way.
+  // instead, it looks up the enum by name (I guess?)
+  // This function adapts the x-enumNames value so it can be found by our code.
+
+  const enumerations =
+    message.components?.schemas?.ProjectEnumerations?.properties;
+  const nameToEnumOptions = enumerations && Object.fromEntries(
+    Object.values(enumerations)
+      .filter((p: any) => p['x-enumName'])
+      .map((p: any) => [p['x-enumName'], p['x-enumNames']])
+  );
+  return nameToEnumOptions || {};
+}
+
 export async function createSvg(message_: any): Promise<string> {
   const message = await RefParser.default.dereference(message_);
+  const enumNameToOptions = enumNames(message);
   const title = await makeTitleBox({
     title: message.info.title,
     version: message.components.schemas[message.info.title]['x-aggregate-version'],
   });
-  const attributes = await makeAttributes(message);
+  const attributes = await makeAttributes(message, { enumNameToOptions });
   const svgHeight = attributes.height + 80;
   const svgWidth = Math.max(attributes.width, title.width) + 10;
   return `

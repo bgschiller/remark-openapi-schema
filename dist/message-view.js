@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.schemaToSvg = exports.createSvg = exports._makeAttributes = void 0;
+exports.schemaToSvg = exports.createSvg = exports.enumNames = exports._makeAttributes = void 0;
 const puppeteer_brillo_1 = require("puppeteer-brillo");
 const json_schema_ref_parser_1 = __importDefault(require("json-schema-ref-parser"));
 const chalk_1 = __importDefault(require("chalk"));
@@ -70,10 +70,10 @@ async function makeTitleBox({ title, version }) {
     const size = await sizeInBrowser(text);
     return { messageName: text, width: size.width + 10 };
 }
-async function makeAttributes(message) {
+async function makeAttributes(message, { enumNameToOptions }) {
     const title = message.info.title;
     const schemas = message.components.schemas;
-    const attrs = _makeAttributes(schemas[title], { name: title, indent: 0 })
+    const attrs = _makeAttributes(schemas[title], { name: title, indent: 0, enumNameToOptions })
         .slice(1) // strip off first object's name
         .map(([indent, contents], ix) => `<tspan x="${indent * 12 + 4}" dy="${ix === 0 ? '.6' : '1.2'}em">- ${contents}</tspan>`)
         .join('\n');
@@ -89,17 +89,17 @@ function warn(msg) {
     console.log(chalk_1.default.yellow(msg));
 }
 const PRIMITIVE_TYPES = ['string', 'integer', 'number', 'boolean'];
-function _makeAttributes(schema, { indent, name }) {
+function _makeAttributes(schema, { indent, name, enumNameToOptions }) {
     if (schema.type === 'object') {
         return [
             [indent, `${name}: object of`],
-            ...Object.keys(schema.properties).flatMap(k => _makeAttributes(schema.properties[k], { name: k, indent: indent + 1 }))
+            ...Object.keys(schema.properties).flatMap(k => _makeAttributes(schema.properties[k], { name: k, indent: indent + 1, enumNameToOptions }))
         ];
     }
-    else if (schema['x-enumNames']) {
+    else if (schema['x-enumName']) {
         return [
             [indent, `${name}: enum of`],
-            ...schema['x-enumNames'].map((n) => ([indent + 1, n])),
+            ...(schema['x-enumNames'] || enumNameToOptions[schema['x-enumName']]).map((n) => ([indent + 1, n])),
         ];
     }
     else if (PRIMITIVE_TYPES.includes(schema.type)) {
@@ -112,33 +112,48 @@ function _makeAttributes(schema, { indent, name }) {
     else if (schema.type === 'array' && schema.items && schema.items.type === 'object') {
         return [
             [indent, `${name}: array of objects with`],
-            ...Object.keys(schema.items.properties).flatMap(k => _makeAttributes(schema.items.properties[k], { name: k, indent: indent + 1 }))
+            ...Object.keys(schema.items.properties).flatMap(k => _makeAttributes(schema.items.properties[k], { name: k, indent: indent + 1, enumNameToOptions }))
         ];
     }
     else if (schema.type === 'array' && Array.isArray(schema.items)) {
         // specialization for tuple
         return [
             [indent, `${name}: tuple of`],
-            ...schema.items.flatMap((i, ix) => _makeAttributes(i, { indent: indent + 1, name: `${ix}` })),
+            ...schema.items.flatMap((i, ix) => _makeAttributes(i, { indent: indent + 1, name: `${ix}`, enumNameToOptions })),
         ];
     }
     else if (schema.type === 'array') {
         return [
             [indent, `${name}: array of`],
-            ..._makeAttributes(schema.items, { indent: indent + 1, name: name + '.[]' })
+            ..._makeAttributes(schema.items, { indent: indent + 1, name: name + '.[]', enumNameToOptions })
         ];
     }
     warn(`schema ${name} did not match a rule, so nothing was output`);
     return [];
 }
 exports._makeAttributes = _makeAttributes;
+function enumNames(message) {
+    // the code generator apparently does things in a bass-ackwards way:
+    // https://github.com/TBCTSystems/bct-common-device-standard-messages/commit/c0dd075d9c1e8ffe5acbaf103fc7ccabbe358b6e#diff-89cbd1b59e63e5442fac6337fd997ae97602ee3dce4e192e600ef97d372f4f5e
+    // and avoids using x-enumNames in a sane way.
+    // instead, it looks up the enum by name (I guess?)
+    // This function adapts the x-enumNames value so it can be found by our code.
+    var _a, _b, _c;
+    const enumerations = (_c = (_b = (_a = message.components) === null || _a === void 0 ? void 0 : _a.schemas) === null || _b === void 0 ? void 0 : _b.ProjectEnumerations) === null || _c === void 0 ? void 0 : _c.properties;
+    const nameToEnumOptions = enumerations && Object.fromEntries(Object.values(enumerations)
+        .filter((p) => p['x-enumName'])
+        .map((p) => [p['x-enumName'], p['x-enumNames']]));
+    return nameToEnumOptions || {};
+}
+exports.enumNames = enumNames;
 async function createSvg(message_) {
     const message = await json_schema_ref_parser_1.default.default.dereference(message_);
+    const enumNameToOptions = enumNames(message);
     const title = await makeTitleBox({
         title: message.info.title,
         version: message.components.schemas[message.info.title]['x-aggregate-version'],
     });
-    const attributes = await makeAttributes(message);
+    const attributes = await makeAttributes(message, { enumNameToOptions });
     const svgHeight = attributes.height + 80;
     const svgWidth = Math.max(attributes.width, title.width) + 10;
     return `
